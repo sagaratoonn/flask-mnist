@@ -6,17 +6,51 @@ from flask import Flask, jsonify, request
 # from flasgger import Swagger
 import base64
 from io import BytesIO
+from flasgger import Swagger
+
 
 model = None
 imagesND = None
 im = None
 
 app = Flask(__name__)
-# swagger = Swagger(app)
+swagger = Swagger(app)
  
-@app.route('/recognise', methods=['POST'])
-def hello():
-    hello = "Detected"
+@app.route('/recognize', methods=['POST'])
+def recognise():
+    """Detect Number DNN API
+    Accept base64 encoded png image only.
+    ---
+    consumes: [ "application/json" ]
+    produces: [ "application/json" ]
+    parameters:
+      - name: data
+        in: body
+        type: string
+        required: true
+        schema: 
+	  $ref: '#/definitions/Image'
+
+    definitions:
+      Image:
+        type: object
+        properties:
+          data:
+            type: "string"
+            example: "iVBORw0KGgoAAAANSUhEUgAAAZIAAAAxCAIAAAB/H7hZAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAJpUlEQVR4nO3dX0hTbxgH8Cdbc9r8tcaQkBIRMVMLIw0xXSEiFiISYiJGIiIhIuKVhElEmHQhXtgfCExkjJTwQoQkYumcokEmMcTExEyWDftnS+dS97sYk3OevWc7us1O8Hzu/L7P+3S6OC/n//Y5nU4ghJB/RwgOCCFE2mjZIoT8Y2jZIoT8Y2Q4EDY+Pm4wGMbGxubm5iwWy+rq6tbWllqtjomJSUlJyc7OzsvLi4"
+      Number:
+        type: string
+        properties:
+          number:
+            type: "string"
+            example: "8"
+    responses:
+      200:
+        description: A list of colors (may be filtered by palette)
+        schema:
+          $ref: '#/definitions/Number'
+    """
+
     global imagesND
     global model
 
@@ -36,7 +70,7 @@ def hello():
     images.append(im)
         
     pd = model.predict_classes(np.array(images, dtype=float))
-    return str(pd)
+    return jsonify({'number': str(pd[0])})
  
 if __name__ == "__main__":
     # create Keras DNN Model
