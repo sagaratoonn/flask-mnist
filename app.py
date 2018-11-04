@@ -2,23 +2,30 @@ from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
-from flask import Flask
+from flask import Flask, jsonify, request
+# from flasgger import Swagger
 import base64
 from io import BytesIO
-
 
 model = None
 imagesND = None
 im = None
+
 app = Flask(__name__)
+# swagger = Swagger(app)
  
-@app.route('/')
+@app.route('/recognise', methods=['POST'])
 def hello():
     hello = "Detected"
     global imagesND
     global model
 
-    data = "iVBORw0KGgoAAAANSUhEUgAAACAAAAAxCAIAAAA0kjydAAADkUlEQVR4nNyYP0v7ahTHe0uINgQJRURKcSiioQTnIqWziEiR4AuQIiIdxEkcRBxKX0AR6SBSSnBwLFIcJIQMRaSIiNTiEIqEDBJKCKEGMXco/EhzTtLoxeH+zubD+X4/j8+fc56GcBwn8psR/VX3vwJAjM14eXlpNBqiKHa73ff3d8MwGIaJx+Msy+ZyubW1tcXFxSC94x9PT0/r6+vRaNB/GY1G8/n88/Ozn4kv4Pz8nKKokOtAUVStVvsGoFqthrR2x8XFRShAq9UiSfIHAJIk7+7uxgOy2ewP3IeRy+XGAGRZRpUURZVKJUVRbNtWFKVcLtM0jWbKshwEODg4gBqCIG5vbz2ZkiQRBHLKDw8PgwCZTAZqCoUCXEnHcXZ2dmDy8vJyECCZTEKNJEkoQJIkmDw3NxcEmJychJp+v48CdF2HyRRFuXNC1SK//ZyamoKDX19f7j+9gOnpaagxDAMF9Pt9ODgzMxMEWFpagprHx0cUgI57HLyA1dVVqKnX6yhAEAQ46HWA+8YwjEdDEIQoip5MURThPWAYRtf1oFPkOE6lUoHzomm6XC73er0/Nxmttaenpx43vJoWCgV0TYIDvY++/aBUKqF3Ag2SJE9OTlCfoI72+vq6tbU11p3n+U6n42fiC9A0rVgswg2HQdP09va2qqrfAFxeXvrd3gCMIAihAOgpChmVSmUMQBRF9BnBcZwgCKqq2ratqmq9Xuc4DqYRBOEpvSOAz89PlmWhjOd527Y9UxkMBhsbGzA5nU77AhqNBhTMz89bloVulWVZqVQKSq6vr//kjKzG1dUVzN7b24vFYnA8EonEYrH9/X04PuLjnlE6nYbZ3W4Xnf4wOp0OlHAchy8R2kAGg0EAwLIsKGEYBl8iNNvTocKE2yfqIcPsXq8X4KUoChx0+4wA0H55c3MTAGg2m3BwxMe9oDzPw+xUKmWaJroBhmGgz5zNzU18k8/OztBp5vN5uNWWZaH9NRKJVKtVHPD29ub3rh6WCk3ThqWiVquhZ3rYG9yV1VuLdnd3UVn4KBaLbkMvQNO0RCLxY/dkMqlpWhDAcZz7+/vwP57cQdN0u932uOENp91uLywsfMudZdmHhwdo5dsyTdM8OjryvAPRmJ2dPT4+9jvK/wR/q/j4+Gg2m7Ist1otVVV1XTdNk6bpeDyeSCQymUw2m11ZWZmYmPBzGAP47/H//1bx64B/AwAA//8hAgL3rTY0NQAAAABJRU5ErkJggg=="
+    if request.headers['Content-Type'] != 'application/json':
+        print(request.headers['Content-Type'])
+        return flask.jsonify(res='error'), 400
+
+    print(request.json)
+    data = request.json.get('data')
 
     images = []
     im = Image.open(BytesIO(base64.b64decode(data))).convert('L')
